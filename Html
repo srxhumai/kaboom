@@ -1,0 +1,71 @@
+<script src="https://unpkg.com/kaboom@3000.0.0/dist/kaboom.js"></script>
+<script src="your-game.js"></script>
+// Kaboom.js ko initialize karo
+import kaboom from "kaboom";
+kaboom();
+
+// Sprites load karo (placeholder ya online assets use kar sakte ho)
+loadSprite("player", "https://kaboomjs.com/sprites/bean.png");
+loadSprite("tree", "https://kaboomjs.com/sprites/tree.png");
+
+// Game scene
+scene("game", () => {
+  // Player
+  const player = add([
+    sprite("player"),
+    pos(100, 100),
+    area(),
+    body(),
+    "player",
+  ]);
+
+  // Player movement
+  onKeyDown("w", () => player.move(0, -100));
+  onKeyDown("s", () => player.move(0, 100));
+  onKeyDown("a", () => player.move(-100, 0));
+  onKeyDown("d", () => player.move(100, 0));
+
+  // Resources (trees)
+  const tree = add([
+    sprite("tree"),
+    pos(300, 300),
+    area(),
+    "tree",
+  ]);
+
+  // Hunger system
+  let hunger = 100;
+  const hungerText = add([
+    text("Hunger: 100"),
+    pos(10, 10),
+  ]);
+
+  // Hunger decrease over time
+  loop(1, () => {
+    hunger -= 1;
+    hungerText.text = `Hunger: ${hunger}`;
+    if (hunger <= 0) {
+      go("gameOver");
+    }
+  });
+
+  // Collect resource
+  player.onCollide("tree", (t) => {
+    if (keyIsPressed("e")) {
+      destroy(t);
+      hunger += 10; // Food collect karne se hunger badhta hai
+    }
+  });
+});
+
+// Game over scene
+scene("gameOver", () => {
+  add([
+    text("Game Over!"),
+    pos(center()),
+    origin("center"),
+  ]);
+});
+
+// Game start
+go("game");
